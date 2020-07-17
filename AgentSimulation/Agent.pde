@@ -52,7 +52,7 @@ class Agent{
     
     
     Vec2 goalPos = goals[firstGoal];
-    vel = goalPos.minus(pos).normalized();
+    Vec2 goalForce = goalPos.minus(pos).normalized();
     float dist = goalPos.distanceTo(pos);
     // if reach the goal, remove it from the list
     if (dist < stepLen) {
@@ -62,8 +62,10 @@ class Agent{
       numGoals--;
     }
     else{
-      vel.add(avoidForce.times(stepLen));
-      pos.add(vel.times(stepLen));
+      vel.add(goalForce.times(1.3));
+      vel.add(avoidForce.times(1.0));
+      vel.clampToLength(5.0);
+      pos.add(vel.times(0.2));
     }
   }
     
