@@ -18,9 +18,6 @@ class Agent{
     return true;
   }
   
- 
-  
-  
   void step(float stepLen,
             Vec2[] circlePos, float[] circleRad, int circleNum,
             Vec2[] boxPos, float[] boxW, float[] boxH, int boxNum, Agent[] agent, int id, int numAgent){
@@ -68,9 +65,6 @@ class Agent{
       vel.add(avoidForce.times(stepLen));
       pos.add(vel.times(stepLen));
     }
-    
-  
-    
   }
     
   void display(){
@@ -80,10 +74,10 @@ class Agent{
     popMatrix();
   }
   
-  //Clear out every previous goal
+  // Clear out every previous goal
    void clearGoal(){
-     numGoals=0;
-     goals = new Vec2[maxGoals];
+     numGoals = 0;
+     firstGoal = 0;
   }
   
 }

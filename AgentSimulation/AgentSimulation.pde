@@ -24,8 +24,6 @@ ArrayList<Integer>[] curPath=new ArrayList[numAgent];
 
 // initialize agent settings
 float agentRad = 10.0;
-
-
 Agent[] myAgent=new Agent[numAgent];
 
 // camera parameters
@@ -39,50 +37,35 @@ void setup(){
   cameraPos = new Vec3(width/2.0, height/2.0, 750);
   theta = -PI/2; phi = PI/2;
   cameraDir = new Vec3(cos(theta)*sin(phi),cos(phi),sin(theta)*sin(phi));
-  cameraDir.mul(800);
   
   // place obstacles
   placeRandomObstacles(numCircle, numBox);
   
   // create start & goal
-  
-  for(int i=0; i<numAgent; i++){
+  for (int i = 0; i < numAgent; i++){
     startPos[i] = sampleFreePos();
-  initialStartPos[i]=startPos[i];
-  goalPos[i] = sampleFreePos();
-  myAgent[i] = new Agent(startPos[i], agentRad);
+    initialStartPos[i] = startPos[i];
+    goalPos[i] = sampleFreePos();
+    myAgent[i] = new Agent(startPos[i], agentRad);
   }
-   
-  // create prm
+  
   prm = new RoadMap(numNodes, circlePos, circleRad, numCircle, boxTopLeft, boxW, boxH, numBox);
-  // path plan
-   for(int i=0; i<numAgent; i++){
-    curPath[i]=prm.planPath(startPos[i], goalPos[i], circlePos, circleRad, numCircle, boxTopLeft, boxW, boxH, numBox);
-   
-  // add path goals to agent
-  if (curPath[i].size() == 1 && curPath[i].get(0) == -1)
-    continue;
-    for (int ind : curPath[i])
-    myAgent[i].addGoal(prm.nodePos[ind]);
-    
-   myAgent[i].addGoal(goalPos[i]);
-    
-   }
-   
-
   
-  
+  // CHANGE FUNCTION NAME
+  // reset(): build PRM and find paths
+  reset();
 }
 
 void draw(){
   //if the user has placed a new obstacle, reset the road map and the start position becomes where the agent is currently at.
   if(changed==true){
     for(int i=0;i<numAgent;i++){
-    startPos[i]=myAgent[i].pos;
-     myAgent[i] = new Agent(startPos[i], agentRad);
-   
+      // deep copy
+      startPos[i].x = myAgent[i].pos.x;
+      startPos[i].y = myAgent[i].pos.y;
    }
-    reset(myAgent);
+    reset();
+    changed = false;
   }
   
   if (!paused){
@@ -92,7 +75,6 @@ void draw(){
   }
   cameraUpdate(0.05);
   
-  //println("FrameRate:",frameRate);
   strokeWeight(1);
 
   // grey background
@@ -222,7 +204,7 @@ void keyPressed(){
   if (key == 's' || key == 'S') startPos[0].y+=5;   sPressed = true;
   if (key == 'd' || key == 'D') startPos[0].x+=5;   dPressed = true;
       
-     myAgent[0] = new Agent(startPos[0], agentRad); reset(myAgent);
+     myAgent[0] = new Agent(startPos[0], agentRad); reset();
   }
   if (key == 'q' || key == 'Q') qPressed = true;
   if (key == 'e' || key == 'E') ePressed = true;
@@ -260,34 +242,30 @@ void mousePressed(){
 }
 
 void placeObstacles(float posX, float posY){
-     
     circlePos[numCircle] = new Vec2(posX, posY);
     circleRad[numCircle] = agentRad+30;
-    numCircle++;
-    
-    
+    numCircle++; 
 }
 
 boolean paused = true;
 
-//reset the roadmap
-void reset(Agent[] myAgent){
- 
- // create prm
-  prm = new RoadMap(numNodes, circlePos, circleRad, numCircle, boxTopLeft, boxW, boxH, numBox);
-  // path plan
+// rebuild the roadmap
+void reset(){
+  // create prm
+  prm.updateCurrentNodes(circlePos, circleRad, numCircle, boxTopLeft, boxW, boxH, numBox);
+  prm.connectNeighbors(circlePos, circleRad, numCircle, boxTopLeft, boxW, boxH, numBox);
+  
+  // plan paths
+  for(int i=0; i<numAgent; i++){
+    // find path in PRM
+    curPath[i] = prm.planPath(startPos[i], goalPos[i], circlePos, circleRad, numCircle, boxTopLeft, boxW, boxH, numBox);
    
- for(int i=0; i<numAgent; i++){
-  curPath[i] = prm.planPath(startPos[i], goalPos[i], circlePos, circleRad, numCircle, boxTopLeft, boxW, boxH, numBox);
-   
-  // add path goals to agent
-  if (curPath[i].size() == 1 && curPath[i].get(0) == -1)
-    continue;
-   
-      myAgent[i].clearGoal();
+    // add path goals to agents
+    myAgent[i].clearGoal(); // clear goal buffer
+    if (curPath[i].size() == 1 && curPath[i].get(0) == -1)
+      continue;  // skip if no path
     for (int ind : curPath[i])
-       myAgent[i].addGoal(prm.nodePos[ind]);
+      myAgent[i].addGoal(prm.nodePos[ind]);
     myAgent[i].addGoal(goalPos[i]);
   }
-  changed=false;
 }
