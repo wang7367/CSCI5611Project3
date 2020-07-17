@@ -34,7 +34,7 @@ void setup(){
   size(1024,768, P3D);
 
   // set camera parameters
-  cameraPos = new Vec3(width/2.0, height/2.0, 750);
+  cameraPos = new Vec3(width/2.0, height/2.0, 665);
   theta = -PI/2; phi = PI/2;
   cameraDir = new Vec3(cos(theta)*sin(phi),cos(phi),sin(theta)*sin(phi));
   
@@ -242,9 +242,9 @@ void mousePressed(){
 }
 
 void placeObstacles(float posX, float posY){
-    circlePos[numCircle] = new Vec2(posX, posY);
-    circleRad[numCircle] = agentRad+30;
-    numCircle++; 
+  circlePos[numCircle] = new Vec2(posX, posY);
+  circleRad[numCircle] = agentRad+30;
+  numCircle++; 
 }
 
 boolean paused = true;
@@ -268,4 +268,12 @@ void reset(){
       myAgent[i].addGoal(prm.nodePos[ind]);
     myAgent[i].addGoal(goalPos[i]);
   }
+}
+
+Vec2 mousePosTransformation(float mousex, float mousey){
+  // default fovy = PI/3.0;
+  // suppose cameraPos = (width/2, height/2, 700)
+  Vec2 actualPos = new Vec2(0.0, 0.0);
+  
+  return actualPos;
 }
