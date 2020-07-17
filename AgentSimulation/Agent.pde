@@ -68,9 +68,16 @@ class Agent{
   }
     
   void display(){
+    float velAngle = dot(vel, new Vec2(0,1))/vel.length();
+    if (vel.x > 0) velAngle = acos(velAngle);
+    else velAngle = -acos(velAngle);
+    
     pushMatrix();
     translate(pos.x, pos.y, 0);
-    sphere(rad);
+    scale(rad/10.0);
+    rotateX(PI/2.0);
+    rotateY(-velAngle);
+    shape(agentShape, 0, 0);
     popMatrix();
   }
   
