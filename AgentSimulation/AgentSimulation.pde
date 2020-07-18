@@ -95,16 +95,16 @@ void draw(){
   stroke(#4B1E0B);
   fill(#8A360F);
   float widthBlank = 200.0, heightBlank = 150.0, depthBlank = 25.0;
-  pushMatrix();
-  translate(width/2.0, height/2.0, -2000.0);
-  box(width+widthBlank, height+heightBlank, 4000);
-  popMatrix();
+  //pushMatrix();
+  //translate(width/2.0, height/2.0, -2000.0);
+  //box(width+widthBlank, height+heightBlank, 4000);
+  //popMatrix();
     
   // lake
   fill(#375BC4);
   pushMatrix();
-  translate(width/2.0, height/2.0, -1000.0);
-  box(width+widthBlank, height+heightBlank, 2000.0);
+  translate(width/2.0, height/2.0, -2000.0);
+  box(width+widthBlank, height+heightBlank, 4000.0);
   popMatrix();
   
   // camera settings
