@@ -18,9 +18,6 @@ class Agent{
     return true;
   }
   
- 
-  
-  
   void step(float stepLen,
             Vec2[] circlePos, float[] circleRad, int circleNum,
             Vec2[] boxPos, float[] boxW, float[] boxH, int boxNum, Agent[] agent, int id, int numAgent){
@@ -72,7 +69,7 @@ class Agent{
   }
     
     Vec2 goalPos = goals[firstGoal];
-    vel = goalPos.minus(pos).normalized();
+    Vec2 goalForce = goalPos.minus(pos).normalized();
     float dist = goalPos.distanceTo(pos);
     // if reach the goal, remove it from the list
     if (dist < stepLen) {
@@ -82,25 +79,31 @@ class Agent{
       numGoals--;
     }
     else{
-      vel.add(avoidForce.times(stepLen));
-      pos.add(vel.times(stepLen));
+      vel.add(goalForce.times(1.3));
+      vel.add(avoidForce.times(1.0));
+      vel.clampToLength(5.0);
+      pos.add(vel.times(0.2));
     }
-    
-  
-    
   }
     
   void display(){
+    float velAngle = dot(vel, new Vec2(0,1))/vel.length();
+    if (vel.x > 0) velAngle = acos(velAngle);
+    else velAngle = -acos(velAngle);
+    
     pushMatrix();
     translate(pos.x, pos.y, 0);
-    sphere(rad);
+    scale(rad/10.0);
+    rotateX(PI/2.0);
+    rotateY(-velAngle);
+    shape(agentShape, 0, 0);
     popMatrix();
   }
   
-  //Clear out every previous goal
+  // Clear out every previous goal
    void clearGoal(){
-     numGoals=0;
-     goals = new Vec2[maxGoals];
+     numGoals = 0;
+     firstGoal = 0;
   }
   
 }

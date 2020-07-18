@@ -23,10 +23,9 @@ Vec2[] initialStartPos =new Vec2[numAgent];
 ArrayList<Integer>[] curPath=new ArrayList[numAgent];
 
 // initialize agent settings
-float agentRad = 10.0;
-
-
+float agentRad = 20.0;
 Agent[] myAgent=new Agent[numAgent];
+PShape agentShape;
 
 // camera parameters
 Vec3 cameraPos, cameraDir;
@@ -36,53 +35,43 @@ void setup(){
   size(1024,768, P3D);
 
   // set camera parameters
-  cameraPos = new Vec3(width/2.0, height/2.0, 750);
+  cameraPos = new Vec3(width/2.0, height/2.0, 665);
   theta = -PI/2; phi = PI/2;
   cameraDir = new Vec3(cos(theta)*sin(phi),cos(phi),sin(theta)*sin(phi));
-  cameraDir.mul(800);
+  
+  // load sail model
+  agentShape = loadShape("boat_small.obj");
   
   // place obstacles
   placeRandomObstacles(numCircle, numBox);
   
   // create start & goal
-  
-  for(int i=0; i<numAgent; i++){
+  for (int i = 0; i < numAgent; i++){
     startPos[i] = sampleFreePos();
-  initialStartPos[i]=startPos[i];
-  goalPos[i] = sampleFreePos();
-  myAgent[i] = new Agent(startPos[i], agentRad);
+    initialStartPos[i] = startPos[i];
+    goalPos[i] = sampleFreePos();
+    myAgent[i] = new Agent(startPos[i], agentRad);
   }
-   
-  // create prm
+  
   prm = new RoadMap(numNodes, circlePos, circleRad, numCircle, boxTopLeft, boxW, boxH, numBox);
-  // path plan
-   for(int i=0; i<numAgent; i++){
-    curPath[i]=prm.planPath(startPos[i], goalPos[i], circlePos, circleRad, numCircle, boxTopLeft, boxW, boxH, numBox);
-   
-  // add path goals to agent
-  if (curPath[i].size() == 1 && curPath[i].get(0) == -1)
-    continue;
-    for (int ind : curPath[i])
-    myAgent[i].addGoal(prm.nodePos[ind]);
-    
-   myAgent[i].addGoal(goalPos[i]);
-    
-   }
-   
-
   
-  
+  // CHANGE FUNCTION NAME
+  // reset(): build PRM and find paths
+  reset();
 }
 
 void draw(){
+  println(frameRate);
+  
   //if the user has placed a new obstacle, reset the road map and the start position becomes where the agent is currently at.
   if(changed==true){
     for(int i=0;i<numAgent;i++){
-    startPos[i]=myAgent[i].pos;
-     myAgent[i] = new Agent(startPos[i], agentRad);
-   
+      // deep copy
+      startPos[i].x = myAgent[i].pos.x;
+      startPos[i].y = myAgent[i].pos.y;
    }
-    reset(myAgent);
+    reset();
+    changed = false;
   }
   
   if (!paused){
@@ -92,34 +81,96 @@ void draw(){
   }
   cameraUpdate(0.05);
   
-  //println("FrameRate:",frameRate);
+  // lights settings
+  directionalLight(180, 180, 180, -1, 1, -1);
+  ambientLight(200, 200, 200);
+  specular(255);
+  
   strokeWeight(1);
 
-  // grey background
-  background(200);
-  // a cutting plane
+  // sky blue background
+  background(#87CEEB);
+  
+  // ground
+  stroke(#4B1E0B);
+  fill(#8A360F);
+  float widthBlank = 200.0, heightBlank = 150.0, depthBlank = 25.0;
+  pushMatrix();
+  translate(width/2.0, height/2.0, -2000.0);
+  box(width+widthBlank, height+heightBlank, 4000);
+  popMatrix();
+  
+  // upper grounds
   noStroke();
-  fill(200);
-  rect(0,0,5000,5000);
+  pushMatrix();
+  translate(width/2.0, -heightBlank/4.0, depthBlank/2.0);
+  box(width+widthBlank, heightBlank/2.0, depthBlank);
+  translate(0, height+heightBlank/2.0, 0);
+  box(width+widthBlank, heightBlank/2.0, depthBlank);
+  popMatrix();
+  pushMatrix();
+  translate(-widthBlank/4.0, height/2.0, depthBlank/2.0);
+  box(widthBlank/2.0, height, depthBlank);
+  translate(width+widthBlank/2.0, 0, 0);
+  box(widthBlank/2.0, height, depthBlank);
+  popMatrix();
+  
+  // lake
+  fill(#375BC4);
+  pushMatrix();
+  translate(width/2.0, height/2.0, -1000.0);
+  box(width, height, 2000.0);
+  popMatrix();
+  
   // camera settings
   camera(cameraPos.x, cameraPos.y, cameraPos.z,
   cameraPos.x+cameraDir.x, cameraPos.y+cameraDir.y, cameraPos.z+cameraDir.z,
   0.0, 1.0, 0.0);
 
-  // lights settings
-  directionalLight(180, 180, 180, -1, 1, -1);
-  ambientLight(150, 150, 150);
-  specular(255);
-  
+  noStroke();
   // obstacles settings
-  fill(255);
+  fill(#8A360F);
   // draw the circle obstacles
   for (int i = 0; i < numCircle; i++){
     Vec2 c = circlePos[i];
     float r = circleRad[i]-agentRad;
     pushMatrix();
     translate(c.x, c.y, 0);
-    sphere(r);
+    for (float rad = 0.0; rad < PI*2; rad+=PI/6){
+      Vec2 c1 = new Vec2(r*cos(rad), r*sin(rad));
+      Vec2 c2 = new Vec2(r*cos(rad+PI/6), r*sin(rad+PI/6));
+      // draw bottom triangle
+      beginShape();
+      vertex(0, 0, 0);
+      vertex(c1.x, c1.y, 0);
+      vertex(c2.x, c2.y, 0);
+      endShape(CLOSE);
+      // draw top triangle
+      beginShape();
+      vertex(0, 0, depthBlank);
+      vertex(c1.x, c1.y, depthBlank);
+      vertex(c2.x, c2.y, depthBlank);
+      endShape(CLOSE);
+      // draw sides
+      beginShape();
+      vertex(0, 0, 0);
+      vertex(0, 0, depthBlank);
+      vertex(c1.x, c1.y, depthBlank);
+      vertex(c1.x, c1.y, 0);
+      endShape(CLOSE);
+      beginShape();
+      vertex(0, 0, 0);
+      vertex(0, 0, depthBlank);
+      vertex(c2.x, c2.y, depthBlank);
+      vertex(c2.x, c2.y, 0);
+      endShape(CLOSE);
+      beginShape();
+      vertex(c1.x, c1.y, 0);
+      vertex(c1.x, c1.y, depthBlank);
+      vertex(c2.x, c2.y, depthBlank);
+      vertex(c2.x, c2.y, 0);
+      endShape(CLOSE);
+    }
     popMatrix();
   }
   // draw the box obstacles
@@ -127,16 +178,16 @@ void draw(){
     Vec2 c = boxTopLeft[i];
     float lenX = boxW[i]-agentRad*2, lenY = boxH[i]-agentRad*2, lenZ = agentRad*2;
     pushMatrix();
-    translate(c.x+agentRad+lenX/2, c.y+agentRad+lenY/2, 0);
-    box(boxW[i]-agentRad*2, boxH[i]-agentRad*2, agentRad*2);
+    translate(c.x+agentRad+lenX/2, c.y+agentRad+lenY/2, depthBlank/2.0);
+    box(boxW[i]-agentRad*2, boxH[i]-agentRad*2, depthBlank);
     popMatrix();
   }
       
- 
+   noStroke();
    for(int i=0; i<numAgent;i++){ 
    // draw start
   fill(20,60,250);
-  circle(initialStartPos[i].x,initialStartPos[i].y,20);
+  circle(initialStartPos[i].x,initialStartPos[i].y,agentRad*2);
   // draw goal
   fill(250,30,50);
   circle(goalPos[i].x,goalPos[i].y,20);
@@ -152,7 +203,6 @@ void draw(){
   for(int i=0;i<numAgent;i++){
    prm.displayPath(startPos[i], goalPos[i], curPath[i]);
   }
-  
 }
 
 void placeRandomObstacles(int numCircle, int numBox){
@@ -162,7 +212,7 @@ void placeRandomObstacles(int numCircle, int numBox){
     circleRad[i] = agentRad+10+40*pow(random(1),2);
   }
   for (int i = 0; i < numBox; i++){
-    boxTopLeft[i] = new Vec2(random(50,950), random(50,700));
+    boxTopLeft[i] = new Vec2(random(50,950), random(50,600));
     boxW[i] = agentRad*2+20+80*pow(random(1),2);
     boxH[i] = agentRad*2+20+80*pow(random(1),2);
   }
@@ -222,7 +272,7 @@ void keyPressed(){
   if (key == 's' || key == 'S') startPos[0].y+=5;   sPressed = true;
   if (key == 'd' || key == 'D') startPos[0].x+=5;   dPressed = true;
       
-     myAgent[0] = new Agent(startPos[0], agentRad); reset(myAgent);
+     myAgent[0] = new Agent(startPos[0], agentRad); reset();
   }
   if (key == 'q' || key == 'Q') qPressed = true;
   if (key == 'e' || key == 'E') ePressed = true;
@@ -301,34 +351,30 @@ void mouseDragged(){
 }
 
 void placeObstacles(float posX, float posY){
-     
-    circlePos[numCircle] = new Vec2(posX, posY);
-    circleRad[numCircle] = agentRad+30;
-    numCircle++;
-    
-    
+  circlePos[numCircle] = new Vec2(posX, posY);
+  circleRad[numCircle] = agentRad+30;
+  numCircle++; 
 }
 
 boolean paused = true;
 
-//reset the roadmap
-void reset(Agent[] myAgent){
- 
- // create prm
-  prm = new RoadMap(numNodes, circlePos, circleRad, numCircle, boxTopLeft, boxW, boxH, numBox);
-  // path plan
+// rebuild the roadmap
+void reset(){
+  // create prm
+  prm.updateCurrentNodes(circlePos, circleRad, numCircle, boxTopLeft, boxW, boxH, numBox);
+  prm.connectNeighbors(circlePos, circleRad, numCircle, boxTopLeft, boxW, boxH, numBox);
+  
+  // plan paths
+  for(int i=0; i<numAgent; i++){
+    // find path in PRM
+    curPath[i] = prm.planPath(startPos[i], goalPos[i], circlePos, circleRad, numCircle, boxTopLeft, boxW, boxH, numBox);
    
- for(int i=0; i<numAgent; i++){
-  curPath[i] = prm.planPath(startPos[i], goalPos[i], circlePos, circleRad, numCircle, boxTopLeft, boxW, boxH, numBox);
-   
-  // add path goals to agent
-  if (curPath[i].size() == 1 && curPath[i].get(0) == -1)
-    continue;
-   
-      myAgent[i].clearGoal();
+    // add path goals to agents
+    myAgent[i].clearGoal(); // clear goal buffer
+    if (curPath[i].size() == 1 && curPath[i].get(0) == -1)
+      continue;  // skip if no path
     for (int ind : curPath[i])
-       myAgent[i].addGoal(prm.nodePos[ind]);
+      myAgent[i].addGoal(prm.nodePos[ind]);
     myAgent[i].addGoal(goalPos[i]);
   }
-  changed=false;
 }

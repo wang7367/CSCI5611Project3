@@ -165,6 +165,19 @@ class RoadMap{
     }
   }
   
+  void updateCurrentNodes(Vec2[] circlePos, float[] circleRad, int circleNum,
+                          Vec2[] boxPos, float[] boxW, float[] boxH, int boxNum){
+    for (int i = 0; i < numNodes; i++){
+      boolean insideAnyCircle = pointInCircleList(circlePos, circleRad, circleNum, nodePos[i]);
+      boolean insideAnyBox = pointInBoxList(boxPos, boxW, boxH, boxNum, nodePos[i]);
+      while (insideAnyCircle || insideAnyBox){
+        nodePos[i] = new Vec2(random(width),random(height)); // generate new node
+        insideAnyCircle = pointInCircleList(circlePos, circleRad, circleNum, nodePos[i]);
+        insideAnyBox = pointInBoxList(boxPos, boxW, boxH, boxNum, nodePos[i]);
+      }
+    }
+  }
+  
   // fill adjency matrix
   void connectNeighbors(Vec2[] circlePos, float[] circleRad, int circleNum,
                         Vec2[] boxPos, float[] boxW, float[] boxH, int boxNum){
