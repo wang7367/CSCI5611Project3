@@ -14,7 +14,7 @@ float[] boxH = new float[maxNumObstacles/2];
 int numNodes  = 500;
 RoadMap prm;
 
-int numAgent=20;
+int numAgent=5;
 
 // initialize path settings
 Vec2[] startPos = new Vec2[numAgent];
@@ -38,7 +38,6 @@ void setup(){
   cameraPos = new Vec3(width/2.0, height/2.0, 665);
   theta = -PI/2; phi = PI/2;
   cameraDir = new Vec3(cos(theta)*sin(phi),cos(phi),sin(theta)*sin(phi));
-  ortho();
   
   // load sail model
   agentShape = loadShape("boat_small.obj");
@@ -62,7 +61,7 @@ void setup(){
 }
 
 void draw(){
-  println(frameRate);
+  surface.setTitle(String.format("fps: %f",frameRate));
   
   //if the user has placed a new obstacle, reset the road map and the start position becomes where the agent is currently at.
   if(changed==true){
@@ -100,27 +99,12 @@ void draw(){
   translate(width/2.0, height/2.0, -2000.0);
   box(width+widthBlank, height+heightBlank, 4000);
   popMatrix();
-  
-  // upper grounds
-  noStroke();
-  pushMatrix();
-  translate(width/2.0, -heightBlank/4.0, depthBlank/2.0);
-  box(width+widthBlank, heightBlank/2.0, depthBlank);
-  translate(0, height+heightBlank/2.0, 0);
-  box(width+widthBlank, heightBlank/2.0, depthBlank);
-  popMatrix();
-  pushMatrix();
-  translate(-widthBlank/4.0, height/2.0, depthBlank/2.0);
-  box(widthBlank/2.0, height, depthBlank);
-  translate(width+widthBlank/2.0, 0, 0);
-  box(widthBlank/2.0, height, depthBlank);
-  popMatrix();
-  
+    
   // lake
   fill(#375BC4);
   pushMatrix();
   translate(width/2.0, height/2.0, -1000.0);
-  box(width, height, 2000.0);
+  box(width+widthBlank, height+heightBlank, 2000.0);
   popMatrix();
   
   // camera settings
@@ -184,27 +168,26 @@ void draw(){
     popMatrix();
   }
       
-   noStroke();
+   Vec3 color0 = new Vec3(20, 60, 250);
+   Vec3 color1 = new Vec3(250, 30, 50);
    for(int i=0; i<numAgent;i++){
+     Vec3 colorNow = interpolate(color0, color1, i/(float)numAgent);
    // TODO: LINEAR INTERPOLATION -> start & goal COLOR
    // draw start
-  fill(20,60,250);
+   noStroke();
+  fill(colorNow.x, colorNow.y, colorNow.z);
   circle(initialStartPos[i].x,initialStartPos[i].y,agentRad*2);
   // draw goal
-  fill(250,30,50);
-  circle(goalPos[i].x,goalPos[i].y,20);
+  circle(goalPos[i].x,goalPos[i].y,agentRad*2);
+  stroke(colorNow.x, colorNow.y, colorNow.z);
+  strokeWeight(5);
+  prm.displayPath(startPos[i], goalPos[i], curPath[i]);
    }
   // draw agent
   fill(100, 255, 200);
  for(int i=0;i<numAgent;i++){
   myAgent[i].display();
  }
-  // draw path
-  stroke(20,255,40);
-  strokeWeight(5);
-  for(int i=0;i<numAgent;i++){
-   prm.displayPath(startPos[i], goalPos[i], curPath[i]);
-  }
 }
 
 void placeRandomObstacles(int numCircle, int numBox){
