@@ -253,10 +253,51 @@ void keyReleased(){
 boolean changed; //track if the mouse has been pressed.
 boolean hasStarted;
 
+int whichOne;
+boolean circleSelected;
+boolean movingObstacles;
 //place obstacles by mouse
 void mousePressed(){
+  if(ctrlPressed){
+     circleSelected=false;
+     movingObstacles=true;
+    
+    for (int i = 0; i < numCircle; i++){
+    if(dist(circlePos[i].x,circlePos[i].y,mouseX,mouseY)<20){
+        whichOne=i;
+        circleSelected=true;
+         changed=true;
+        return;
+    }
+  }
+  if(!circleSelected){
+  for (int i = 0; i < numBox; i++){
+    if(((mouseX-boxTopLeft[i].x)>boxW[i]/4)&&((mouseX-boxTopLeft[i].x)<boxW[i]*3/4)&&((mouseY-boxTopLeft[i].y)>boxH[i]/4)&&((mouseY-boxTopLeft[i].y)<boxH[i]*3/4)) {
+      whichOne=i;
+      changed=true;
+    return;
+    }
+  }
+  }
+  }else{
  placeObstacles(mouseX, mouseY);
  changed=true;
+ movingObstacles=false;
+  }
+}
+
+void mouseDragged(){
+  if(movingObstacles){
+    
+  if(circleSelected){
+   circlePos[whichOne].x=mouseX;
+        circlePos[whichOne].y=mouseY;
+  }else{
+      boxTopLeft[whichOne].x=mouseX;
+    boxTopLeft[whichOne].y=mouseY;
+  }
+  }
+  
 }
 
 void placeObstacles(float posX, float posY){
