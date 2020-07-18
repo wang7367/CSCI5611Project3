@@ -51,7 +51,6 @@ class RoadMap{
   }
   
   void displayPath(Vec2 startPos, Vec2 goalPos, ArrayList<Integer> path){
-
     if (path.size() == 1 && path.get(0) == -1) return; // stop if no path exists
     // draw settings
     if (path.size() == 0)
@@ -73,8 +72,6 @@ class RoadMap{
     ArrayList<Integer> path = new ArrayList<Integer>();
   
     Vec2 goal = nodePos[goalID];
-    
-  
     
     // create pairs list
     Pair[] aStarPairs = new Pair[numNodes];
@@ -165,6 +162,7 @@ class RoadMap{
     }
   }
   
+  // test to see if currentnodes are outside the obstacles
   void updateCurrentNodes(Vec2[] circlePos, float[] circleRad, int circleNum,
                           Vec2[] boxPos, float[] boxW, float[] boxH, int boxNum){
     for (int i = 0; i < numNodes; i++){
@@ -178,7 +176,7 @@ class RoadMap{
     }
   }
   
-  // fill adjency matrix
+  // connect neighbors (fill adjency matrix)
   void connectNeighbors(Vec2[] circlePos, float[] circleRad, int circleNum,
                         Vec2[] boxPos, float[] boxW, float[] boxH, int boxNum){
     for (int i = 0; i < numNodes; i++){
@@ -200,6 +198,7 @@ class RoadMap{
     }
   }
   
+  // add new roadmap node and link edges with neighbors
   void addNewNode(Vec2 newPos,
                   Vec2[] circlePos, float[] circleRad, int circleNum,
                   Vec2[] boxPos, float[] boxW, float[] boxH, int boxNum){
