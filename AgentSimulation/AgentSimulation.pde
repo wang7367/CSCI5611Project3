@@ -322,6 +322,7 @@ void mouseDragged(){
       boxTopLeft[whichOne].x=mouseX;
       boxTopLeft[whichOne].y=mouseY;
     }
+    changed=true;
   }
 }
 
