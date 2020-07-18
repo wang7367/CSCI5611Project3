@@ -10,10 +10,6 @@ public class Vec2 {
     this.y = y;
   }
   
-  public String toString(){
-    return "(" + x+ "," + y +")";
-  }
-  
   public float length(){
     return sqrt(x*x+y*y);
   }
@@ -35,18 +31,8 @@ public class Vec2 {
     return new Vec2(x-rhs.x, y-rhs.y);
   }
   
-  public void subtract(Vec2 rhs){
-    x -= rhs.x;
-    y -= rhs.y;
-  }
-  
   public Vec2 times(float rhs){
     return new Vec2(x*rhs, y*rhs);
-  }
-  
-  public void mul(float rhs){
-    x *= rhs;
-    y *= rhs;
   }
   
   public void clampToLength(float maxL){
@@ -55,18 +41,6 @@ public class Vec2 {
       x *= maxL/magnitude;
       y *= maxL/magnitude;
     }
-  }
-  
-  public void setToLength(float newL){
-    float magnitude = sqrt(x*x + y*y);
-    x *= newL/magnitude;
-    y *= newL/magnitude;
-  }
-  
-  public void normalize(){
-    float magnitude = sqrt(x*x + y*y);
-    x /= magnitude;
-    y /= magnitude;
   }
   
   public Vec2 normalized(){
@@ -81,18 +55,6 @@ public class Vec2 {
   }
 }
 
-Vec2 interpolate(Vec2 a, Vec2 b, float t){
-  return a.plus((b.minus(a)).times(t));
-}
-
-float interpolate(float a, float b, float t){
-  return a + ((b-a)*t);
-}
-
 float dot(Vec2 a, Vec2 b){
   return a.x*b.x + a.y*b.y;
-}
-
-Vec2 projAB(Vec2 a, Vec2 b){
-  return b.times(a.x*b.x + a.y*b.y);
 }
