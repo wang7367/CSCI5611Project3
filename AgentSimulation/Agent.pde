@@ -52,7 +52,24 @@ class Agent{
      }
   }
     
-    
+       for (int i = 0; i < circleNum; i++){
+    if (pos.distanceTo(circlePos[i]) < (circleRad[i]+rad)){
+      Vec2 normal = (pos.minus(circlePos[i])).normalized();
+      pos =circlePos[i].plus(normal.times(circleRad[i]+rad).times(1.01));
+      Vec2 velNormal = normal.times(dot(vel,normal));
+      vel.subtract(velNormal.times(0.1));
+    }
+  }
+  
+   for (int i = 0; i < boxNum; i++){
+     Vec2 boxCenter=new Vec2(boxPos[i].x+boxW[i]/2.0,boxPos[i].y+boxH[i]/2.0);
+    if ((abs(pos.x-boxCenter.x)<boxW[i]/2.0)&&(abs(pos.y-boxCenter.y)<boxH[i]/2.0)){
+      Vec2 normal = (pos.minus(boxCenter)).normalized();
+      pos =boxCenter.plus(normal.times(pos.distanceTo(boxCenter)).times(1.01));
+      Vec2 velNormal = normal.times(dot(vel,normal));
+      vel.subtract(velNormal.times(0.1));
+    }
+  }
     
     Vec2 goalPos = goals[firstGoal];
     vel = goalPos.minus(pos).normalized();
