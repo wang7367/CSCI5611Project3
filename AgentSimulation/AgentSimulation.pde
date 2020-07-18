@@ -14,7 +14,7 @@ float[] boxH = new float[maxNumObstacles/2];
 int numNodes  = 500;
 RoadMap prm;
 
-int numAgent=5;
+int numAgent=20;
 
 // initialize path settings
 Vec2[] startPos = new Vec2[numAgent];
@@ -38,6 +38,7 @@ void setup(){
   cameraPos = new Vec3(width/2.0, height/2.0, 665);
   theta = -PI/2; phi = PI/2;
   cameraDir = new Vec3(cos(theta)*sin(phi),cos(phi),sin(theta)*sin(phi));
+  ortho();
   
   // load sail model
   agentShape = loadShape("boat_small.obj");
@@ -184,7 +185,8 @@ void draw(){
   }
       
    noStroke();
-   for(int i=0; i<numAgent;i++){ 
+   for(int i=0; i<numAgent;i++){
+   // TODO: LINEAR INTERPOLATION -> start & goal COLOR
    // draw start
   fill(20,60,250);
   circle(initialStartPos[i].x,initialStartPos[i].y,agentRad*2);
